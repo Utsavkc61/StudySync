@@ -24,7 +24,8 @@ public class TutoringTrackingSystemGUI {
     JTextField topicField = new JTextField();
 
     JLabel classLabel = new JLabel("Class:");
-    JTextField classField = new JTextField();
+    String[] classOptions = {"CM 105", "CM 111", "CM 130", "CM 203",  "CM 231", "CM 245","CM 261", "CM 290", "CM 303", "CM 307", "CM 322", "CM 331", "CM 333"};
+    JComboBox<String> classDropdown = new JComboBox<>(classOptions);
     
      // New label and text field for Reason for Visiting
     JLabel reasonLabel = new JLabel("Reason for Visiting:");
@@ -47,7 +48,7 @@ public class TutoringTrackingSystemGUI {
     mainPanel.add(topicLabel);
     mainPanel.add(topicField);
     mainPanel.add(classLabel);
-    mainPanel.add(classField);
+    mainPanel.add(classDropdown);
     mainPanel.add(reasonLabel); 
     mainPanel.add(reasonField);
 
@@ -62,4 +63,3 @@ public class TutoringTrackingSystemGUI {
     frame.setVisible(true);
   }
 }
-
