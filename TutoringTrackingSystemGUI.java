@@ -25,6 +25,11 @@ public class TutoringTrackingSystemGUI {
     JPanel mainPanel = new JPanel();
     mainPanel.setLayout(new GridLayout(7, 2, 10, 10)); // Rows, Columns, Hgap, Vgap
 
+    JPanel paddedPanel= new JPanel(new BorderLayout());
+    paddedPanel.setOpaque(false);
+    paddedPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+    paddedPanel.add(mainPanel, BorderLayout.CENTER);
+
     // Labels and Text Fields for Student Information
     JLabel studentIdLabel = new JLabel("Student Win Number:");
     JTextField studentIdField = new JTextField();
@@ -77,7 +82,7 @@ public class TutoringTrackingSystemGUI {
     mainPanel.add(viewHistoryButton);
 
     // Adding the main panel and text area for logs to the frame
-    frame.add(mainPanel, BorderLayout.NORTH);
+    frame.add(paddedPanel, BorderLayout.NORTH);
     frame.add(scrollPane, BorderLayout.CENTER);
 
     addVisitButton.addActionListener((ActionListener) new ActionListener()
