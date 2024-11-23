@@ -23,7 +23,7 @@ public class TutoringTrackingSystemGUI {
 
     // Main panel
     JPanel mainPanel = new JPanel();
-    mainPanel.setLayout(new GridLayout(7, 2, 10, 10)); // Rows, Columns, Hgap, Vgap
+    mainPanel.setLayout(new GridLayout(9, 2, 10, 10)); // Rows, Columns, Hgap, Vgap
 
     JPanel paddedPanel= new JPanel(new BorderLayout());
     paddedPanel.setOpaque(false);
@@ -58,6 +58,9 @@ public class TutoringTrackingSystemGUI {
     // Add Visit Button and View Visit History
     JButton addVisitButton = new JButton("Add Visit");
     JButton viewHistoryButton = new JButton("View Visit History");
+    //Add Edit Button and Import Button
+    JButton addEditButton = new JButton("Edit");
+    JButton addImportButton = new JButton("Import");
 
     // Help button with '?' icon
     JButton helpButton = new JButton("?");
@@ -95,9 +98,10 @@ public class TutoringTrackingSystemGUI {
     mainPanel.add(classDropdown);
     mainPanel.add(reasonLabel); 
     mainPanel.add(reasonField);
-
     mainPanel.add(addVisitButton);
     mainPanel.add(viewHistoryButton);
+    mainPanel.add(addEditButton);
+    mainPanel.add(addImportButton);
 
     // Adding help button to bottom-right corner
     JPanel bottomPanel = new JPanel(new BorderLayout());
