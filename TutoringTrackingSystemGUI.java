@@ -32,6 +32,13 @@ public class TutoringTrackingSystemGUI {
     JLabel nameLabel = new JLabel("Student Name:");
     JTextField nameField = new JTextField();
 
+    JLabel tutorLabel = new JLabel("Tutor:");
+        String[] tutorOptions = {
+            "Drew", "Pra"
+        };
+        JComboBox<String> tutorDropdown = new JComboBox<>(tutorOptions);
+
+
     JLabel topicLabel = new JLabel("Tutoring Topic:");
     JTextField topicField = new JTextField();
 
@@ -57,6 +64,8 @@ public class TutoringTrackingSystemGUI {
     mainPanel.add(studentIdField);
     mainPanel.add(nameLabel);
     mainPanel.add(nameField);
+    mainPanel.add(tutorLabel);
+    mainPanel.add(tutorDropdown);
     mainPanel.add(topicLabel);
     mainPanel.add(topicField);
     mainPanel.add(classLabel);
