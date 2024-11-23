@@ -59,6 +59,24 @@ public class TutoringTrackingSystemGUI {
     JButton addVisitButton = new JButton("Add Visit");
     JButton viewHistoryButton = new JButton("View Visit History");
 
+    // Help button with '?' icon
+    JButton helpButton = new JButton("?");
+    helpButton.setToolTipText("Click for help"); // Hover message
+    helpButton.setPreferredSize(new Dimension(20, 20)); // Make button smaller
+    helpButton.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            JOptionPane.showMessageDialog(frame,
+                        "This is the CS Tutoring Tracking System.\n" +
+                        "- Fill in the student information fields.\n" +
+                        "- Select the tutor and class.\n" +
+                        "- Add the reason for the visit and click 'Add Visit'.\n" +
+                        "- Use 'View Visit History' to see previous records.",
+                        "Help",
+                        JOptionPane.INFORMATION_MESSAGE);
+        }
+    });
+
     // Area for viewing saved visit logs
     JTextArea visitLogsArea = new JTextArea(8, 40);
     visitLogsArea.setEditable(false); // Makes the area read-only
@@ -81,9 +99,16 @@ public class TutoringTrackingSystemGUI {
     mainPanel.add(addVisitButton);
     mainPanel.add(viewHistoryButton);
 
+    // Adding help button to bottom-right corner
+    JPanel bottomPanel = new JPanel(new BorderLayout());
+    bottomPanel.setOpaque(false);
+    bottomPanel.add(helpButton, BorderLayout.EAST);
+
+
     // Adding the main panel and text area for logs to the frame
     frame.add(paddedPanel, BorderLayout.NORTH);
     frame.add(scrollPane, BorderLayout.CENTER);
+    backgroundPanel.add(bottomPanel, BorderLayout.SOUTH);
 
     addVisitButton.addActionListener((ActionListener) new ActionListener()
     {
