@@ -106,9 +106,9 @@ public class TutoringTrackingSystemGUI {
 
 
     // Adding the main panel and text area for logs to the frame
-    backgroundPanel.add(paddedPanel, BorderLayout.NORTH);
-    backGroundPanel.add(scrollPane, BorderLayout.CENTER);
-    backgroundPanel.add(bottomPanel, BorderLayout.SOUTH);
+    frame.add(paddedPanel, BorderLayout.NORTH);
+    frame.add(scrollPane, BorderLayout.CENTER);
+    frame.add(bottomPanel, BorderLayout.SOUTH);
 
     addVisitButton.addActionListener((ActionListener) new ActionListener()
     {
