@@ -1,1 +1,25 @@
+-- Table for Students
+CREATE TABLE IF NOT EXISTS Student (
+    win_number VARCHAR(15) PRIMARY KEY,
+    student_name VARCHAR(255) NOT NULL
+);
+
+-- Table for Tutors
+CREATE TABLE IF NOT EXISTS Tutor (
+    win_number VARCHAR(15) PRIMARY KEY,
+    tutor_name VARCHAR(255) NOT NULL
+);
+
+-- Table for Visits
+CREATE TABLE IF NOT EXISTS Visit (
+    visit_id INT AUTO_INCREMENT PRIMARY KEY,
+    student_win VARCHAR(15) NOT NULL,
+    tutor_win VARCHAR(15) NOT NULL,
+    class_name VARCHAR(50) NOT NULL,
+    visit_date DATE NOT NULL,
+    topic VARCHAR(255),
+    reason VARCHAR(255),
+    FOREIGN KEY (student_win) REFERENCES Student(win_number),
+    FOREIGN KEY (tutor_win) REFERENCES Tutor(win_number)
+);
 
