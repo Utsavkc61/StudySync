@@ -1,30 +1,46 @@
 JFrame searchFrame = new JFrame("Search Visit History");
-        searchFrame.setSize(400,300);
+        JFrame searchFrame = new JFrame("Search Visit History");
+        searchFrame.setSize(400, 300);
         searchFrame.setLayout(new BorderLayout());
-        //searchFrame.getContentPane().setBackground(new Color(200, 220, 255)); // Light cyan-like color
 
-        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
-        searchPanel.setBackground(new Color(230,230,230));
+        // Create a padded panel for content
+        JPanel paddedPanel = new JPanel(new BorderLayout());
+        paddedPanel.setOpaque(false);
+        paddedPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        JLabel searchLabel = new JLabel("Enter Student WIN number");
-        JTextField searchField = new JTextField(15);
+        // Search input panel with GridLayout
+        JPanel searchPanel = new JPanel(new GridLayout(2, 1, 10, 10));
+        JTextField searchField = new JTextField();
+        JTextArea searchResultArea = new JTextArea(8, 30); // Multi-line, scrollable text area
+        searchResultArea.setEditable(false); // Read-only
 
-        JTextArea searchResultArea = new JTextArea(6,30);
-        searchResultArea.setEditable(false);
+        // Add a scroll pane for the search result text area
         JScrollPane searchScrollPane = new JScrollPane(searchResultArea);
-        searchScrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        searchScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        searchScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setBackground(new Color(230,230,230));
-        JButton searchButton = new JButton("Search");
-        buttonPanel.add(searchButton);
-
-        searchPanel.add(searchLabel);
+        // Add components to the search panel
+        searchPanel.add(new JLabel("Enter Student WIN number: "));
         searchPanel.add(searchField);
 
-        searchFrame.add(searchPanel, BorderLayout.NORTH);
-        searchFrame.add(searchScrollPane, BorderLayout.CENTER);
-        searchFrame.add(buttonPanel, BorderLayout.SOUTH);
+        // Search button
+        JButton searchButton = new JButton("Search");
+        searchButton.setPreferredSize(new Dimension(80, 30)); // Set custom size for the button
+        searchButton.setAlignmentX(Component.CENTER_ALIGNMENT); // Center the button
+
+        // Add components to the padded panel
+        paddedPanel.add(searchPanel, BorderLayout.NORTH);
+        paddedPanel.add(searchScrollPane, BorderLayout.CENTER); // Add scrollable text area
+        paddedPanel.add(searchButton, BorderLayout.SOUTH); // Place the button at the bottom
+
+        // Center align the button
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setOpaque(false);
+        buttonPanel.add(searchButton);
+        paddedPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Add the padded panel to the frame
+        searchFrame.add(paddedPanel, BorderLayout.CENTER);
 
         searchButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e)
