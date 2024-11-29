@@ -1,0 +1,30 @@
+JFrame updateFrame = new JFrame("Update Visit Record");
+        updateFrame.setSize(400,300);
+        updateFrame.setLayout(new BorderLayout());
+
+        JPanel updatePanel = new JPanel(new GridLayout(6,2,10,10));
+         
+        JLabel visitIdLabel = new JLabel("Visit ID");
+        JTextField visitIdField = new JTextField();
+        JLabel studentIdLabel = new JLabel("Student Win Number:");
+        JTextField studentIdField = new JTextField();
+        JLabel studentNameLabel = new JLabel("Student Name:");
+        JTextField studentNameField = new JTextField();
+        JLabel topicLabel = new JLabel("Tutoring Topic:");
+        JTextField topicField = new JTextField();
+        JLabel reasonLabel = new JLabel("Reason for Visit:");
+        JTextField reasonField = new JTextField();
+
+        updatePanel.add(visitIdLabel);
+        updatePanel.add(visitIdField);
+        updatePanel.add(studentIdLabel);
+        updatePanel.add(studentIdField);
+        updatePanel.add(studentNameLabel);
+        updatePanel.add(studentNameField);
+        updatePanel.add(topicLabel);
+        updatePanel.add(topicField);
+        updatePanel.add(reasonLabel);
+        updatePanel.add(reasonField);
+
+        JButton fetchButton = new JButton("Retrieve");
+        JButton saveButton = new JButton("Save Changes");
