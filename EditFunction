@@ -28,3 +28,12 @@ JFrame updateFrame = new JFrame("Update Visit Record");
 
         JButton fetchButton = new JButton("Retrieve");
         JButton saveButton = new JButton("Save Changes");
+
+ JPanel buttonPanel = new JPanel();
+        buttonPanel.add(fetchButton);
+        buttonPanel.add(saveButton);
+        
+        updateFrame.add(updatePanel, BorderLayout.CENTER);
+        updateFrame.add(buttonPanel, BorderLayout.SOUTH);
+        
+        updateFrame.setVisible(true);
