@@ -1,10 +1,16 @@
 JFrame updateFrame = new JFrame("Update Visit Record");
-        updateFrame.setSize(400,300);
+        updateFrame.setSize(400, 300);
         updateFrame.setLayout(new BorderLayout());
+        updateFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Ensures closing only this frame
 
-        JPanel updatePanel = new JPanel(new GridLayout(6,2,10,10));
-         
-        JLabel visitIdLabel = new JLabel("Visit ID");
+        // Padded panel for spacing
+        JPanel paddedPanel = new JPanel(new BorderLayout());
+        paddedPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Update form panel
+        JPanel updatePanel = new JPanel(new GridLayout(6, 2, 10, 10));
+
+        JLabel visitIdLabel = new JLabel("Visit ID:");
         JTextField visitIdField = new JTextField();
         JLabel studentIdLabel = new JLabel("Student Win Number:");
         JTextField studentIdField = new JTextField();
@@ -26,14 +32,19 @@ JFrame updateFrame = new JFrame("Update Visit Record");
         updatePanel.add(reasonLabel);
         updatePanel.add(reasonField);
 
+        // Button panel
         JButton fetchButton = new JButton("Retrieve");
         JButton saveButton = new JButton("Save Changes");
 
- JPanel buttonPanel = new JPanel();
+        JPanel buttonPanel = new JPanel();
         buttonPanel.add(fetchButton);
         buttonPanel.add(saveButton);
-        
-        updateFrame.add(updatePanel, BorderLayout.CENTER);
-        updateFrame.add(buttonPanel, BorderLayout.SOUTH);
-        
+
+        // Add components to padded panel
+        paddedPanel.add(updatePanel, BorderLayout.CENTER);
+        paddedPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Add padded panel to the frame
+        updateFrame.add(paddedPanel, BorderLayout.CENTER);
+
         updateFrame.setVisible(true);
