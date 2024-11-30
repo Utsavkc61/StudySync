@@ -1,1 +1,87 @@
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 
+import javax.swing.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import static org.mockito.Mockito.*;
+
+@RunWith(MockitoJUnitRunner.class)
+public class TutoringTrackingSystemGUITest {
+
+    @InjectMocks
+    private TutoringTrackingSystemGUI tutoringTrackingSystemGUI;
+
+    @Mock
+    private Connection mockConnection;
+
+    @Mock
+    private PreparedStatement mockPreparedStatement;
+
+    @Mock
+    private ResultSet mockResultSet;
+
+    @Before
+    public void setUp() throws SQLException {
+        MockitoAnnotations.openMocks(this);
+        when(DatabaseManager.getConnection()).thenReturn(mockConnection);
+    }
+
+    @Test
+    public void testSaveVisitToDatabase() throws SQLException {
+        String studentWin = "22540011";
+        String studentName = "Mike Tyson";
+        String topic = "Data Structures";
+        String className = "CM 105";
+        String reason = "I need some help with binary trees";
+        String tutorWin = "22540080";
+
+        // Mocking the behavior of the prepared statements
+        when(mockConnection.prepareStatement(any(String.class))).thenReturn(mockPreparedStatement);
+        
+        // Call the method under test
+        TutoringTrackingSystemGUI.saveVisitToDatabase(studentWin, studentName, topic, className, reason, tutorWin);
+
+        // Verify the interactions
+        verify(mockPreparedStatement, times(1)).setString(1, studentWin);
+        verify(mockPreparedStatement, times(1)).setString(2, tutorWin);
+        verify(mockPreparedStatement, times(1)).setString(3, className);
+        verify(mockPreparedStatement, times(1)).setString(4, topic);
+        verify(mockPreparedStatement, times(1)).setString(5, reason);
+        verify(mockPreparedStatement, times(1)).executeUpdate();
+    }
+
+    @Test
+    public void testDisplayVisitHistory() throws SQLException {
+        // Mocking the behavior of the result set
+        when(mockConnection.prepareStatement(any(String.class))).thenReturn(mockPreparedStatement);
+        when(mockPreparedStatement.executeQuery()).thenReturn(mockResultSet);
+        
+        // Mocking the result set to return data
+        when(mockResultSet.next()).thenReturn(true).thenReturn(false);
+        when(mockResultSet.getInt("visit_id")).thenReturn(1);
+        when(mockResultSet.getString("student_name")).thenReturn("Mike Tyson");
+        when(mockResultSet.getString("win_number")).thenReturn("22540011");
+        when(mockResultSet.getString("tutor_name")).thenReturn("Drew");
+        when(mockResultSet.getString("class_name")).thenReturn("CM 105");
+        when(mockResultSet.getDate("visit_date")).thenReturn(java.sql.Date.valueOf("2024-12-03"));
+        when(mockResultSet.getString("topic")).thenReturn("Data Structures");
+        when(mockResultSet.getString("reason")).thenReturn("I need some help with binary trees");
+
+        // Call the method under test
+        JTextArea visitLogsArea = new JTextArea();
+        TutoringTrackingSystemGUI.displayVisitHistory(visitLogsArea);
+
+        // Verify the output in visitLogsArea
+        String expectedLog = "ID: 1 | Student: Mike Tyson (WIN: 22540011) | Tutor: Drew | Class: CM 105 | Date: 2024-12-03 | Topic: Data Structures | Reason: I need some help with binary trees\n";
+        assertEquals(expectedLog, visitLogsArea.getText());
+    }
+}
