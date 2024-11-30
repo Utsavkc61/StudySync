@@ -1,6 +1,9 @@
 package toggle;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.plaf.ActionMapUIResource;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,7 +15,7 @@ import java.sql.SQLException;
 public class TutoringTrackingSystemGUI {
 
     private JFrame frame;
-    private JButton addVisitButton, viewHistoryButton, EditButton, ImportButton;
+    private JButton addVisitButton, viewHistoryButton, EditButton, ImportButton, SearchButton;
     private JPanel mainPanel;
     private JTextField studentIdField, nameField, topicField, reasonField;
     private JComboBox<String> tutorDropdown, classDropdown;
@@ -21,7 +24,7 @@ public class TutoringTrackingSystemGUI {
     // Constructor
     public TutoringTrackingSystemGUI() {
         // Initialize the frame
-        frame = new JFrame("CS Tutoring Tracking System");
+        frame = new JFrame("StudySync");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 600);
 
@@ -62,8 +65,9 @@ public class TutoringTrackingSystemGUI {
         addVisitButton.setName("addVisitButton");
         viewHistoryButton.setName("viewHistoryButton");
 
-        EditButton = new JButton("Edit");
-        ImportButton = new JButton("Import");
+        //EditButton = new JButton("Edit");
+        SearchButton = new JButton("Search");
+        EditButton = new JButton("Update");
 
         // Help Button
         JButton helpButton = new JButton("?");
@@ -87,6 +91,7 @@ public class TutoringTrackingSystemGUI {
         visitLogsArea = new JTextArea(8, 40);
         visitLogsArea.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(visitLogsArea);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0)); 
 
         // Adding components to the panel
         mainPanel.add(studentIdLabel);
@@ -104,8 +109,8 @@ public class TutoringTrackingSystemGUI {
 
         mainPanel.add(addVisitButton);
         mainPanel.add(viewHistoryButton);
+        mainPanel.add(SearchButton);
         mainPanel.add(EditButton);
-        mainPanel.add(ImportButton);
 
         // Bottom panel for help button
         JPanel bottomPanel = new JPanel(new BorderLayout());
@@ -127,7 +132,7 @@ public class TutoringTrackingSystemGUI {
                 String className = (String) classDropdown.getSelectedItem();
                 String reason = reasonField.getText();
 
-                if (studentWin.isEmpty() || studentName.isEmpty() || tutorName == null || topic.isEmpty() || className == null || reason.isEmpty()) {
+                if (studentWin.isEmpty() || studentName.isEmpty() || tutorName == null || topic.isEmpty() || className == null) {
                     JOptionPane.showMessageDialog(frame, "Please fill out all fields.", "Error", JOptionPane.ERROR_MESSAGE);
                 } else if (studentWin.length() < 8) {
                     JOptionPane.showMessageDialog(frame, "Invalid Win number", "Invalid input", JOptionPane.ERROR_MESSAGE);
@@ -148,6 +153,18 @@ public class TutoringTrackingSystemGUI {
             }
         });
 
+        SearchButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e)
+            {
+                openSearchFrame();
+            }
+        });
+
+        EditButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e){
+                updatePerformed();
+            }
+        });
         // Make frame visible
         frame.setVisible(true);
     }
@@ -168,10 +185,27 @@ public class TutoringTrackingSystemGUI {
         return null;
     }
 
-    private static void saveVisitToDatabase(String studentWin, String studentName, String topic, String className, String reason, String tutorWin) {
+    private String getTutorName(String tutorWin) {
+        String querySQL = "SELECT tutor_name FROM Tutor WHERE win_number = ?";
+        try (Connection connection = DatabaseManager.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(querySQL)) {
+            preparedStatement.setString(1, tutorWin);
+    
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getString("tutor_name");
+                }
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(frame, "Error retrieving tutor name: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        return null;
+    }
+
+    private void saveVisitToDatabase(String studentWin, String studentName, String topic, String className, String reason, String tutorWin) {
         String studentInsertSQL = "INSERT INTO Student (win_number, student_name) VALUES (?, ?) ON DUPLICATE KEY UPDATE student_name = VALUES(student_name)";
         String visitInsertSQL = "INSERT INTO Visit (student_win, tutor_win, class_name, visit_date, topic, reason) VALUES (?, ?, ?, CURDATE(), ?, ?)";
-
+        //Should clear all the fileds once the data is entered
         try (Connection connection = DatabaseManager.getConnection()) {
             // Insert or update student details
             try (PreparedStatement studentStmt = connection.prepareStatement(studentInsertSQL)) {
@@ -191,6 +225,7 @@ public class TutoringTrackingSystemGUI {
             }
 
             JOptionPane.showMessageDialog(null, "Visit logged successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            clearFields();
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Failed to log visit: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -198,34 +233,235 @@ public class TutoringTrackingSystemGUI {
 
     private static void displayVisitHistory(JTextArea visitLogsArea) {
         String querySQL = "SELECT v.visit_id, s.student_name, s.win_number, t.tutor_name, v.class_name, v.visit_date, v.topic, v.reason " +
-                "FROM Visit v " +
-                "JOIN Student s ON v.student_win = s.win_number " +
-                "JOIN Tutor t ON v.tutor_win = t.win_number";
+            "FROM Visit v " +
+            "JOIN Student s ON v.student_win = s.win_number " +
+            "JOIN Tutor t ON v.tutor_win = t.win_number " +
+            "ORDER BY v.visit_id";
 
         try (Connection connection = DatabaseManager.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(querySQL);
              ResultSet resultSet = preparedStatement.executeQuery()) {
 
-            visitLogsArea.setText(""); // Clear previous logs
-
+            StringBuilder logs = new StringBuilder();
             while (resultSet.next()) {
-                String visitLog = String.format(
-                        "ID: %d | Student: %s (WIN: %s) | Tutor: %s | Class: %s | Date: %s | Topic: %s | Reason: %s\n",
-                        resultSet.getInt("visit_id"),
-                        resultSet.getString("student_name"),
-                        resultSet.getString("win_number"),
-                        resultSet.getString("tutor_name"),
-                        resultSet.getString("class_name"),
-                        resultSet.getDate("visit_date"),
-                        resultSet.getString("topic"),
-                        resultSet.getString("reason")
-                );
-
-                visitLogsArea.append(visitLog);
+                logs.append("• Visit ID: ").append(resultSet.getInt("visit_id")).append("\n")
+                        .append("• Student Name: ").append(resultSet.getString("student_name"))
+                        .append(" • Student Win Number: ").append(resultSet.getString("win_number")).append("\n")
+                        .append("• Tutor: ").append(resultSet.getString("tutor_name"))
+                        .append(" • Class: ").append(resultSet.getString("class_name"))
+                        .append(" • Date: ").append(resultSet.getDate("visit_date")).append("\n")
+                        .append("• Topic: ").append(resultSet.getString("topic"))
+                        .append(" • Reason: ").append(resultSet.getString("reason")).append("\n")
+                        .append("-----------------------------------------------------------------\n");
             }
+            visitLogsArea.setText(logs.toString());
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error retrieving visit history: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Failed to retrieve visit history: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private void openSearchFrame()
+    {
+        
+        JFrame searchFrame = new JFrame("Search Visit History");
+        searchFrame.setSize(400,300);
+        searchFrame.setLayout(new BorderLayout());
+        //searchFrame.getContentPane().setBackground(new Color(200, 220, 255)); // Light cyan-like color
+
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        searchPanel.setBackground(new Color(230,230,230));
+
+        JLabel searchLabel = new JLabel("Enter Student WIN number");
+        JTextField searchField = new JTextField(15);
+
+        JTextArea searchResultArea = new JTextArea(6,30);
+        searchResultArea.setEditable(false);
+
+        JScrollPane searchScrollPane = new JScrollPane(searchResultArea);
+        searchScrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); 
+        
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setBackground(new Color(230,230,230));
+        JButton searchButton = new JButton("Search");
+        buttonPanel.add(searchButton);
+
+        searchPanel.add(searchLabel);
+        searchPanel.add(searchField);
+
+        searchFrame.add(searchPanel, BorderLayout.NORTH);
+        searchFrame.add(searchScrollPane, BorderLayout.CENTER);
+        searchFrame.add(buttonPanel, BorderLayout.SOUTH);
+
+        searchButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e)
+            {
+                String studentWin = searchField.getText().trim();
+                if(studentWin.isEmpty())
+                {
+                    JOptionPane.showMessageDialog(searchFrame, "Please enter a WIN number", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                //String querySQL = "SELECT v.visit_id, s.student_name, t.tutor_name, v.class_name, v.visit_date, v.topic, v.reason" + "FROM Visit v"
+                                   // + "JOIN Student s ON v.student_win = s.win_number" + "JOIN Tutor t ON v.tutor_win = t.win_number" +
+                                    //"WHERE s.win_number=?";
+
+                                    String querySQL = "SELECT v.visit_id, s.student_name, t.tutor_name, v.class_name, v.visit_date, v.topic, v.reason " +
+                                    "FROM Visit v " +
+                                    "JOIN Student s ON v.student_win = s.win_number " +
+                                    "JOIN Tutor t ON v.tutor_win = t.win_number " +
+                                    "WHERE s.win_number = ?";
+                  
+                try(Connection connection = DatabaseManager.getConnection();
+                    PreparedStatement preparedStatement = connection.prepareStatement(querySQL))
+                    {
+                        preparedStatement.setString(1, studentWin);
+
+                        try(ResultSet resultSet = preparedStatement.executeQuery())
+                        {
+                            StringBuilder results = new StringBuilder();
+                            while(resultSet.next())
+                            {
+                                results.append("Visit ID: ").append(resultSet.getInt("visit_id")).append("\n") .append("Student Name: ").append(resultSet.getString("student_name")).append("\n") .append("Tutor: ").append(resultSet.getString("tutor_name")).append("\n") .append("Class: ").append(resultSet.getString("class_name")).append("\n") .append("Date: ").append(resultSet.getDate("visit_date")).append("\n") .append("Topic: ").append(resultSet.getString("topic")).append("\n") .append("Reason: ").append(resultSet.getString("reason")).append("\n") .append("----------------------------------------\n");
+                            }
+                            if(results.length()==0)
+                            {
+                                results.append("No visits found for WIN number ").append(studentWin).append(".");
+                            }
+                            searchResultArea.setText(results.toString());
+                        }
+                    }catch(SQLException ex)
+                    {
+                        JOptionPane.showMessageDialog(searchFrame, "Error retrieving visit history: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                
+            }
+        });
+
+        searchFrame.setVisible(true);
+    }
+
+    private void updatePerformed()
+    {
+        JFrame updateFrame = new JFrame("Update Visit Record");
+        updateFrame.setSize(400,300);
+        updateFrame.setLayout(new BorderLayout());
+
+        JPanel updatePanel = new JPanel(new GridLayout(6,2,10,10));
+         
+        JLabel visitIdLabel = new JLabel("Visit ID");
+        JTextField visitIdField = new JTextField();
+        JLabel studentIdLabel = new JLabel("Student Win Number:");
+        JTextField studentIdField = new JTextField();
+        JLabel studentNameLabel = new JLabel("Student Name:");
+        JTextField studentNameField = new JTextField();
+        JLabel topicLabel = new JLabel("Tutoring Topic:");
+        JTextField topicField = new JTextField();
+        JLabel reasonLabel = new JLabel("Reason for Visit:");
+        JTextField reasonField = new JTextField();
+
+        updatePanel.add(visitIdLabel);
+        updatePanel.add(visitIdField);
+        updatePanel.add(studentIdLabel);
+        updatePanel.add(studentIdField);
+        updatePanel.add(studentNameLabel);
+        updatePanel.add(studentNameField);
+        updatePanel.add(topicLabel);
+        updatePanel.add(topicField);
+        updatePanel.add(reasonLabel);
+        updatePanel.add(reasonField);
+
+        JButton fetchButton = new JButton("Retrieve");
+        JButton saveButton = new JButton("Save Changes");
+
+        fetchButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String visitId = visitIdField.getText();
+                
+                if (visitId.isEmpty()) {
+                    JOptionPane.showMessageDialog(updateFrame, "Please enter a valid Visit ID.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                // Fetch visit details from the database
+                String fetchSQL = "SELECT v.student_win, s.student_name, v.topic, v.reason " +
+                        "FROM Visit v " +
+                        "JOIN Student s ON v.student_win = s.win_number " +
+                        "WHERE v.visit_id = ?";
+                try (Connection connection = DatabaseManager.getConnection();
+                     PreparedStatement preparedStatement = connection.prepareStatement(fetchSQL)) {
+                    preparedStatement.setInt(1, Integer.parseInt(visitId));
+                    
+                    try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                        if (resultSet.next()) {
+                            studentIdField.setText(resultSet.getString("student_win"));
+                            studentNameField.setText(resultSet.getString("student_name"));
+                            topicField.setText(resultSet.getString("topic"));
+                            reasonField.setText(resultSet.getString("reason"));
+                        } else {
+                            JOptionPane.showMessageDialog(updateFrame, "Visit ID not found.", "Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                } catch (SQLException ex) {
+                    JOptionPane.showMessageDialog(updateFrame, "Failed to fetch visit details: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        saveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String visitId = visitIdField.getText();
+                String studentWin = studentIdField.getText();
+                String studentName = studentNameField.getText();
+                String topic = topicField.getText();
+                String reason = reasonField.getText();
+                
+                if (visitId.isEmpty() || studentWin.isEmpty() || studentName.isEmpty() || topic.isEmpty() || reason.isEmpty()) {
+                    JOptionPane.showMessageDialog(updateFrame, "Please fill out all fields.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                // Update the database
+                String updateSQL = "UPDATE Visit v JOIN Student s ON v.student_win = s.win_number " +
+                        "SET v.topic = ?, v.reason = ?, s.student_name = ? " +
+                        "WHERE v.visit_id = ?";
+                try (Connection connection = DatabaseManager.getConnection();
+                     PreparedStatement preparedStatement = connection.prepareStatement(updateSQL)) {
+                    preparedStatement.setString(1, topic);
+                    preparedStatement.setString(2, reason);
+                    preparedStatement.setString(3, studentName);
+                    preparedStatement.setInt(4, Integer.parseInt(visitId));
+                    
+                    int rowsUpdated = preparedStatement.executeUpdate();
+                    if (rowsUpdated > 0) {
+                        JOptionPane.showMessageDialog(updateFrame, "Visit record updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                        updateFrame.dispose();
+                    } else {
+                        JOptionPane.showMessageDialog(updateFrame, "Failed to update visit record.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (SQLException ex) {
+                    JOptionPane.showMessageDialog(updateFrame, "Error updating visit record: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(fetchButton);
+        buttonPanel.add(saveButton);
+        
+        updateFrame.add(updatePanel, BorderLayout.CENTER);
+        updateFrame.add(buttonPanel, BorderLayout.SOUTH);
+        
+        updateFrame.setVisible(true);
+
+    }
+
+    private void clearFields()
+    {
+        studentIdField.setText("");
+        nameField.setText("");
+        topicField.setText("");
+        reasonField.setText("");
+
     }
 
     public JButton getAddVisitButton() {
@@ -269,9 +505,8 @@ public class TutoringTrackingSystemGUI {
         return frame;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) 
+    {
         new TutoringTrackingSystemGUI();
-    }
-
-    
+    }  
 }
