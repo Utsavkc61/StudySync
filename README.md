@@ -1,2 +1,6 @@
 # StudySync
-Software engineering project
+StudySync is a desktop-based student tracking application designed to enhance the efficiency of tutoring sessions in computer labs. The primary purpose of this system is to replace manual tracking methods with a digital solution, allowing tutors to log and manage student visits with ease. By capturing key details such as student name, WIN number, class, topics covered, and reasons for visiting, StudySync provides a streamlined way to monitor student interactions and track learning patterns. 
+
+The core features of StudySync include a user-friendly interface that allows tutors to enter, edit, and view visit records. The system employs SQLite as a local database to ensure efficient data storage and retrieval, providing offline functionality. The MVP of StudySync focuses on basic functionalities such as recording student visits and enabling simple data searches by student name or WIN number, without the need for extensive reporting or administrator-level features at this stage. 
+
+This project aims to alleviate the challenges posed by manual tracking methods, which are prone to errors and lack long-term storage and reporting capabilities. StudySync empowers tutors by offering a reliable, easy-to-use tool that simplifies the tracking of student visits, ultimately improving the overall tutoring experience. Future enhancements may include additional reporting features and administrative capabilities, as well as cloud-based integration for scalability. 
