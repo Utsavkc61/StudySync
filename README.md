@@ -1,6 +1,6 @@
 # StudySync
 
-The Tutor Tracking System helps tutors efficiently manage student visits by allowing them to add, view, search, and update visit records. It's designed with a user-friendly GUI and backed by a robust MySQL database. 
+The Study Sync helps tutors efficiently manage student visits by allowing them to add, view, search, and update visit records. It's designed with a user-friendly GUI and backed by a robust MySQL database. 
 
 ## How It's Made:
 
